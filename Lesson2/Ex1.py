@@ -6,17 +6,33 @@ import os
 def get_data():
     folder_path = os.path.join(os.curdir, 'csv')
     files_list = os.listdir(folder_path)
-    main_data = [["Имя файла", "Название ОС","Код продукта", "Изготовитель системы", "Тип системы"]]
-
+    main_data = [["Название ОС","Код продукта", "Изготовитель системы", "Тип системы"]]
+    s_prod_list = []
+    os_name_list = []
+    os_code_list = []
+    os_type_list = []
     for filename in files_list:
         file_name = os.path.join(folder_path, filename)
-        value_list = [filename]
         with open(file_name, 'r', encoding='windows-1251') as file:
             for line in file:
-                result = re.match(r'Изготовитель системы|Название ОС|Код продукта|Тип системы', line)
+                result = re.match(r'Изготовитель системы', line)
                 if result:
-                    value_list.append(line[result.end()+1:].strip())
-        main_data.append(value_list)
+                    s_prod_list.append(line[result.end()+1:].strip())
+                result = re.match(r'Название ОС', line)
+                if result:
+                    os_name_list.append(line[result.end() + 1:].strip())
+                result = re.match(r'Код продукта', line)
+                if result:
+                    os_code_list.append(line[result.end() + 1:].strip())
+                result = re.match(r'Тип системы', line)
+                if result:
+                    os_type_list.append(line[result.end() + 1:].strip())
+    for i in range(0, 3):
+        main_data.append([])
+        main_data[i + 1].append(os_name_list[i])
+        main_data[ i + 1].append(os_code_list[i])
+        main_data[i + 1].append(s_prod_list[i])
+        main_data[i + 1].append(os_type_list[i])
     return main_data
 
 
