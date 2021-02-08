@@ -1,0 +1,8 @@
+my_dict:
+  1: 1$
+  2: 2ˆ
+my_list:
+- Moscow
+- London
+- Paris
+my_number: 41
