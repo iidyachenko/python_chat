@@ -19,7 +19,7 @@ def send_success_code(client):
 
 
 def main():
-    SETTINGS = load_setting(is_server=False)
+    SETTINGS = load_setting(is_server=False, filename='common/settings.json')
     parser = argparse.ArgumentParser(description='Server arguments')
     parser.add_argument('addr', type=str, nargs='*', default='', help='Clients address')
     parser.add_argument('port', type=int, nargs='*', default='', help='server port')

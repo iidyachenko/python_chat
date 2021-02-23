@@ -5,11 +5,12 @@ import logging
 import log.Client.client_log_config
 
 from socket import socket, AF_INET, SOCK_STREAM
-from common.utils import send_message, get_data_from_message, load_setting
+from common.utils import send_message, get_data_from_message, load_setting, Log, log
 
 logger = logging.getLogger('client')
 
 
+@Log('info')
 def presence(sock):
     msg_presence = {
         "action": "presence",
@@ -29,8 +30,9 @@ def presence(sock):
     return get_data_from_message(response)
 
 
+@Log('info')
 def main():
-    SETTINGS = load_setting(is_server=False)
+    SETTINGS = load_setting(is_server=False, filename='common/settings.json')
     parser = argparse.ArgumentParser(description='Client arguments')
     parser.add_argument('addr', type=str, nargs='*', default='', help='Server address')
     parser.add_argument('port', type=int, nargs='*', default='', help='server port')
