@@ -36,7 +36,6 @@ def my_log(func):
     return wrapper
 
 
-@Log()
 def get_logger(is_server=True):
     if is_server:
         return logging.getLogger('server')
@@ -44,7 +43,6 @@ def get_logger(is_server=True):
         return logging.getLogger('client')
 
 
-@Log()
 def get_data_from_message(response, is_server=True):
     logger = get_logger(is_server)
     response_str = response.decode('utf-8')
@@ -52,7 +50,6 @@ def get_data_from_message(response, is_server=True):
     return json.loads(response_str)
 
 
-@my_log
 def send_message(socket, data_dict, is_server=True):
     logger = get_logger(is_server)
     if isinstance(data_dict, dict):
@@ -60,11 +57,10 @@ def send_message(socket, data_dict, is_server=True):
         logger.debug(f'Сообщение отправлено  {socket}')
         return socket.send(bytes(data, encoding="utf-8"))
     else:
-        logger.critical("Некорректный формат сообщения")
+        logger.critical(f"Некорректный формат сообщения {data_dict} {type(data_dict)}")
         raise TypeError
 
 
-@Log()
 def load_setting(is_server=True, filename='common/settings.json'):
     logger = get_logger(is_server)
 
