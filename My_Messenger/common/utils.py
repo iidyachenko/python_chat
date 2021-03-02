@@ -45,9 +45,13 @@ def get_logger(is_server=True):
 
 def get_data_from_message(response, is_server=True):
     logger = get_logger(is_server)
-    response_str = response.decode('utf-8')
-    logger.debug(f'это респонс {response_str}')
-    return json.loads(response_str)
+    try:
+        response_str = response.decode('utf-8')
+        logger.debug(f'это респонс {response_str}')
+        return json.loads(response_str)
+    except Exception as ex:
+        print(response, ex)
+        raise Exception
 
 
 def send_message(socket, data_dict, is_server=True):
