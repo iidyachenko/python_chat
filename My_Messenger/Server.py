@@ -29,14 +29,16 @@ def read_requests(r_clients, w_clients, all_clients_dict):
         try:
             data = sock.recv(1024).decode('utf-8')
             responses[sock] = json.loads(data)
-            print(responses[sock], type(responses[sock]))
             if responses[sock]['action'] == 'presence':
                 all_clients_dict[sock] = responses[sock]['user']['account_name']
+
         except:
-            print(f' r Клиент { all_clients_dict[sock]} {sock.getpeername()} отключился')
+            print(f' r Клиент {all_clients_dict[sock]} {sock.getpeername()} отключился')
             client_quit_req = {sock: {'action': 'quit', 'username': all_clients_dict[sock]}}
+            # оправляем всем сообщение что пользователь отключился
             write_responses(client_quit_req, w_clients, all_clients_dict)
-            all_clients_dict.pop(sock)
+            if all_clients_dict.get(sock):
+                all_clients_dict.pop(sock)
 
     return responses
 
@@ -46,13 +48,18 @@ def write_responses(requests, w_clients, all_clients_dict):
     for sock in w_clients:
         for _, request in requests.items():
             try:
-                # Подготовить и отправить всем слушающм клиентам ответ в чат
-                send_message(sock, request)
+                print(request)
+                print(all_clients_dict[sock])
+                # Подготовить и отправить всем слушающм клиентам ответ в чат или личным сообщением
+                if request['action'] != 'msg' or request['to'] == all_clients_dict[sock] or request['to'] == '#':
+                    send_message(sock, request)
+                else:
+                    send_success_code(sock)
             except:  # Сокет недоступен, клиент отключился
                 print(f' w Клиент {sock.fileno()} {sock.getpeername()} отключился')
                 sock.close()
-                # all_clients.remove(sock)
-                all_clients_dict.pop(sock)
+                if all_clients_dict.get(sock):
+                    all_clients_dict.pop(sock)
 
 
 def main():
@@ -70,9 +77,8 @@ def main():
     s = socket(AF_INET, SOCK_STREAM)
     s.bind((args.addr, server_port))
     s.listen(SETTINGS['MAX_CONNECTION'])
-    s.settimeout(2)
+    s.settimeout(0.1)
 
-    # clients = []
     clients_info = {}
 
     while True:
@@ -83,7 +89,6 @@ def main():
             pass  # timeout вышел
         else:
             print("Получен запрос на соединение от %s" % str(addr))
-            # clients.append(conn)
             clients_info[conn] = ''
         finally:
             # Проверить наличие событий ввода-вывода
@@ -97,7 +102,6 @@ def main():
 
             requests = read_requests(r, w, clients_info)  # Сохраним запросы клиентов
             if requests:
-                print(requests)
                 write_responses(requests, w, clients_info)
 
 
