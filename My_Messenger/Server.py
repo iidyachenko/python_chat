@@ -62,6 +62,51 @@ def write_responses(requests, w_clients, all_clients_dict):
                     all_clients_dict.pop(sock)
 
 
+class Server:
+
+    def __init__(self):
+        SETTINGS = load_setting(is_server=False, filename='common/settings.json')
+        parser = argparse.ArgumentParser(description='Server arguments')
+        parser.add_argument('addr', type=str, nargs='*', default='', help='Clients address')
+        parser.add_argument('port', type=int, nargs='*', default='', help='server port')
+        args = parser.parse_args()
+        if not args.port:
+            self.server_port = SETTINGS["DEFAULT_PORT"]
+            logger.warning("Успользуются порт сервера по умолчанию")
+        else:
+            self.server_port = args.port
+        self.socket = socket(AF_INET, SOCK_STREAM)
+        self.socket.bind((args.addr, self.server_port))
+        self.socket.listen(SETTINGS['MAX_CONNECTION'])
+        self.socket.settimeout(0.1)
+
+    def run(self):
+        clients_info = {}
+
+        while True:
+
+            try:
+                conn, addr = self.socket.accept()  # Проверка подключений
+            except OSError as e:
+                pass  # timeout вышел
+            else:
+                print("Получен запрос на соединение от %s" % str(addr))
+                clients_info[conn] = ''
+            finally:
+                # Проверить наличие событий ввода-вывода
+                wait = 10
+                r = []
+                w = []
+                try:
+                    r, w, e = select.select(list(clients_info.keys()), list(clients_info.keys()), [], wait)
+                except:
+                    pass  # Ничего не делать, если какой-то клиент отключился
+
+                requests = read_requests(r, w, clients_info)  # Сохраним запросы клиентов
+                if requests:
+                    write_responses(requests, w, clients_info)
+
+
 def main():
     SETTINGS = load_setting(is_server=False, filename='common/settings.json')
     parser = argparse.ArgumentParser(description='Server arguments')
@@ -106,4 +151,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    server = Server()
+    server.run()
