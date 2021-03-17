@@ -9,6 +9,8 @@ from datetime import datetime
 import log.Client.client_log_config
 
 from socket import socket, AF_INET, SOCK_STREAM
+
+from common.metaclasses import ClientVerifier
 from common.utils import send_message, get_data_from_message, load_setting, Log, log
 
 
@@ -23,7 +25,7 @@ class InputThread(threading.Thread):
         self.func(self.sock)
 
 
-class Client():
+class Client(metaclass=ClientVerifier):
 
     __slots__ = ('logger', 'server_addr', 'server_port', 'client_type', 'username', 'lock', 'work_flag')
 
