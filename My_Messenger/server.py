@@ -7,7 +7,7 @@ from json import JSONDecodeError
 from socket import AF_INET, socket, SOCK_STREAM
 import logging
 import log.Server.server_log_config
-from Storage import ServerDB
+from storage import ServerDB
 from common.descriptors import Port
 from common.metaclasses import ServerVerifier
 
