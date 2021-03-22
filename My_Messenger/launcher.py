@@ -8,9 +8,9 @@ while True:
     if action == 'exit':
         break
     elif action == 'server':
-        process.append(subprocess.Popen('python Server.py', creationflags=subprocess.CREATE_NEW_CONSOLE))
-        process.append(subprocess.Popen('python Client.py -c multi -u test1', creationflags=subprocess.CREATE_NEW_CONSOLE))
-        process.append(subprocess.Popen('python Client.py -c multi -u test2', creationflags=subprocess.CREATE_NEW_CONSOLE))
+        process.append(subprocess.Popen('python server.py', creationflags=subprocess.CREATE_NEW_CONSOLE))
+        process.append(subprocess.Popen('python client.py -c multi -u test1', creationflags=subprocess.CREATE_NEW_CONSOLE))
+        process.append(subprocess.Popen('python client.py -c multi -u test2', creationflags=subprocess.CREATE_NEW_CONSOLE))
     elif action == 'x':
         while process:
             proc = process.pop()

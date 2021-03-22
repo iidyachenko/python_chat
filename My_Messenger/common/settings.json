@@ -3,5 +3,6 @@
   "DEFAULT_PORT": 7777,
   "MAX_CONNECTION": 5,
   "MAX_PACKAGE_LENGTH": 100000,
-  "USER": "Igor"
+  "USER": "Igor",
+  "DATABASE": "sqlite:///storage_base.db3"
 }

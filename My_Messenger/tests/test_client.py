@@ -3,7 +3,7 @@ import unittest
 from socket import socket, AF_INET, SOCK_STREAM
 from unittest.mock import Mock
 
-import Client
+import client
 from common import utils
 
 
@@ -18,10 +18,10 @@ class ClientTests(unittest.TestCase):
         mock_socket = Mock(return_value='')
         mock_send = Mock()
         mock_recv = Mock(return_value={'response': '200', 'time': 1612953360})
-        Client.socket.recv = mock_socket
-        Client.send_message = mock_send
-        Client.get_data_from_message = mock_recv
-        self.assertEqual(Client.presence(self.socket), {'response': '200', 'time': 1612953360})
+        client.socket.recv = mock_socket
+        client.send_message = mock_send
+        client.get_data_from_message = mock_recv
+        self.assertEqual(client.presence(self.socket), {'response': '200', 'time': 1612953360})
 
     def tearDown(self):
         self.socket.close()
