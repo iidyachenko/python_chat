@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger('server')
 
+
 class ServerDB:
     Base = declarative_base()
 
@@ -40,8 +41,8 @@ class ServerDB:
     class LoginContact(Base):
         __tablename__ = 'login_contact'
         id = Column(Integer, primary_key=True)
-        user = Column(String, ForeignKey('all_users.id'))
-        user_contact = Column(String, ForeignKey('all_users.id'))
+        user = Column(ForeignKey('all_users.id'))
+        user_contact = Column(ForeignKey('all_users.id'))
         first_contact_time = Column(DateTime)
 
         def __init__(self, user, user_contact, first_contact_time):
@@ -63,6 +64,18 @@ class ServerDB:
             self.ip = ip
             self.port = port
             self.time_conn = time_conn
+
+    class LoginMessageHistory(Base):
+        __tablename__ = 'message_history'
+        id = Column(Integer, primary_key=True)
+        user = Column(ForeignKey('all_users.id'))
+        send = Column(Integer)
+        accepted = Column(Integer)
+
+        def __init__(self, user, send, accepted):
+            self.user = user
+            self.send = send
+            self.accepted = accepted
 
     def __init__(self, database):
         self.engine = create_engine(database, echo=False)
@@ -110,15 +123,41 @@ class ServerDB:
 
     def user_send_message(self, user_from, user_to):
         """Проверяем есть ли данный контакт в таблице, если нет то добавляем"""
-        user = self.session.query(self.LoginContact).filter_by(user=user_from, user_contact=user_to).first()
+        user_from = self.session.query(self.Users).filter_by(login=user_from).first().id
+        user_to = self.session.query(self.Users).filter_by(login=user_to).first().id
+        is_from = self.session.query(self.LoginMessageHistory).filter_by(user=user_from).first()
+        is_to = self.session.query(self.LoginMessageHistory).filter_by(user=user_to).first()
+        if not is_from:
+            new_user = self.LoginMessageHistory(user_from, 1, 0)
+            self.session.add(new_user)
+        else:
+            is_from.send += 1
+        if not is_to:
+            new_user = self.LoginMessageHistory(user_to, 0, 1)
+            self.session.add(new_user)
+        else:
+            is_to.accepted += 1
+        self.session.commit()
+
+    def add_contact(self, user_from, user_to):
+        new_user_from = self.session.query(self.Users).filter_by(login=user_from).first().id
+        new_user_to = self.session.query(self.Users).filter_by(login=user_to).first().id
+        user = self.session.query(self.LoginContact).filter_by(user=new_user_from, user_contact=new_user_to).first()
         if not user:
-            new_user_from = self.session.query(self.Users).filter_by(login=user_from).first()
-            new_user_to = self.session.query(self.Users).filter_by(login=user_to).first()
             # проверям что пользователь корректно заполнил имя пользователя при отправке
             if new_user_from and new_user_to:
-                contact = self.LoginContact(new_user_from.login, new_user_to.login, datetime.datetime.now())
+                contact = self.LoginContact(new_user_from, new_user_to, datetime.datetime.now())
                 self.session.add(contact)
                 self.session.commit()
+
+    def remove_contact(self, user_from, user_to):
+        del_user_from = self.session.query(self.Users).filter_by(login=user_from).first().id
+        del_user_to = self.session.query(self.Users).filter_by(login=user_to).first().id
+        user = self.session.query(self.LoginContact).filter_by(user=del_user_from, user_contact=del_user_to)
+        if user:
+            # проверям что пользователь корректно заполнил имя пользователя при отправке
+            user.delete()
+            self.session.commit()
 
     def users_list(self):
         """ список пользователей"""
@@ -151,12 +190,32 @@ class ServerDB:
             query = query.filter(self.Users.login == username)
         return query.all()
 
+    def contact_list(self, username):
+        user = self.session.query(self.Users).filter_by(login=username).first()
+        query = self.session.query(self.LoginContact.user_contact,
+                                   self.Users.login).filter_by(user=user.id).join(self.Users,
+                                                                        self.Users.id == self.LoginContact.user_contact).all()
+        return [x[1] for x in query]
+
+    def message_history(self):
+        query = self.session.query(
+            self.Users.login,
+            self.Users.last_conn,
+            self.LoginMessageHistory.send,
+            self.LoginMessageHistory.accepted
+        ).join(self.Users)
+        # Возвращаем список кортежей
+        return query.all()
+
 
 if __name__ == '__main__':
     db = ServerDB('sqlite:///storage_base.db3')
-    # db.user_login('Rick', '1/1/1//1', '222222')
+    db.user_login('Rick', '1/1/1//1', '222222')
     # print(db.users_list())
     # print(db.active_users_list())
     # print(db.login_history())
     # db.user_logout('Rick')
-    db.user_send_message('Rick', 'Bob')
+    # db.user_send_message('Rick', 'Roland')
+    # db.add_contact('Rick', 'Nick')
+    # db.remove_contact('Rick', 'Roland')
+    # print(db.contact_list('Rick'))
