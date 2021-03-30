@@ -168,7 +168,9 @@ class Client(metaclass=ClientVerifier):
         response_list = queue.Queue()
         while self.work_flag:
             if self.lock.locked():
+                # sock.settimeout(3)
                 response = sock.recv(1000000)
+                print('Timeout')
                 response_list.put(response)
             else:
                 if not response_list.empty():
