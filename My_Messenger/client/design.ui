@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>572</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MyMessenger - BETA</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QListView" name="contact_list">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>211</width>
+      <height>501</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QListView" name="message_list">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>541</width>
+      <height>361</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="edit_message">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>390</y>
+      <width>431</width>
+      <height>131</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="send_button">
+    <property name="geometry">
+     <rect>
+      <x>684</x>
+      <y>430</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Отправить</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="contacts_label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ваши контакты</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="message_label">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>0</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>История сообщений</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="main_menu">
+    <property name="title">
+     <string>Меню</string>
+    </property>
+    <addaction name="exit_menu"/>
+   </widget>
+   <widget class="QMenu" name="contact_menu">
+    <property name="title">
+     <string>Контакты</string>
+    </property>
+    <addaction name="add_contact"/>
+    <addaction name="remove_contact"/>
+   </widget>
+   <addaction name="main_menu"/>
+   <addaction name="contact_menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="exit_menu">
+   <property name="text">
+    <string>Выход</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="add_contact">
+   <property name="text">
+    <string>Добавить контакт</string>
+   </property>
+  </action>
+  <action name="remove_contact">
+   <property name="text">
+    <string>Удалить контакт</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

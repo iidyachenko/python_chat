@@ -74,6 +74,7 @@ class ClientDB:
     # Функция удаления контакта
     def del_contact(self, contact):
         self.session.query(self.Contacts).filter_by(name=contact).delete()
+        self.session.commit()
 
     def get_users(self):
         return self.session.query(self.Users.login).all()

@@ -6,6 +6,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
 from PyQt5.QtWidgets import QMainWindow, QApplication, qApp, QMessageBox
 
 from client.add_contact_gui import AddContactDialog
+from client.del_contact_gui import DelContactDialog
 from client.main_window_template import Ui_MainWindow
 
 logger = logging.getLogger('client')
@@ -27,6 +28,7 @@ class ClientMainWindow(QMainWindow):
         self.set_disabled_input()
         self.ui.contact_list.clicked.connect(self.set_active_user)
         self.ui.contact_menu.triggered.connect(self.add_contact_window)
+        self.ui.remove_contact.triggered.connect(self.delete_contact_window)
         self.ui.send_button.clicked.connect(self.send_message)
         self.current_chat = None
         self.messages = QMessageBox()
@@ -40,6 +42,7 @@ class ClientMainWindow(QMainWindow):
         self.ui.edit_message.setDisabled(True)
 
     def clients_list_update(self):
+        self.contacts_model.clear()
         contacts_list = self.db.get_contacts()
         for i in sorted(contacts_list):
             item = QStandardItem(i[0])
@@ -76,6 +79,33 @@ class ClientMainWindow(QMainWindow):
             self.contacts_model.appendRow(new_contact)
             logger.info(f'Успешно добавлен контакт {new_contact}')
             self.messages.information(self, 'Успех', 'Контакт успешно добавлен.')
+
+    def delete_contact_window(self):
+        global remove_dialog
+        remove_dialog = DelContactDialog(self.db)
+        remove_dialog.btn_ok.clicked.connect(lambda: self.delete_contact(remove_dialog))
+        remove_dialog.show()
+
+    # Функция обработчик удаления контакта, сообщает на сервер, обновляет таблицу контактов
+    def delete_contact(self, item):
+        selected = item.selector.currentText()
+        try:
+            self.receiver.del_contact_massage(selected)
+        except OSError as err:
+            if err.errno:
+                self.messages.critical(self, 'Ошибка', 'Потеряно соединение с сервером!')
+                self.close()
+            self.messages.critical(self, 'Ошибка', 'Таймаут соединения!')
+        else:
+            self.db.del_contact(selected)
+            self.clients_list_update()
+            logger.info(f'Успешно удалён контакт {selected}')
+            self.messages.information(self, 'Успех', 'Контакт успешно удалён.')
+            item.close()
+            # Если удалён активный пользователь, то деактивируем поля ввода.
+            if selected == self.current_chat:
+                self.current_chat = None
+                self.set_disabled_input()
 
     def set_active_user(self):
         self.current_chat = self.ui.contact_list.currentIndex().data()
@@ -156,7 +186,8 @@ class ClientMainWindow(QMainWindow):
             else:
                 print('NO')
                 # Раз нету,спрашиваем хотим ли добавить юзера в контакты.
-                if self.messages.question(self, 'Новое сообщение',f'Получено новое сообщение от {sender}.\n Данного пользователя нет в вашем контакт-листе.\n Добавить в контакты и открыть чат с ним?',
+                if self.messages.question(self, 'Новое сообщение',
+                                          f'Получено новое сообщение от {sender}.\n Данного пользователя нет в вашем контакт-листе.\n Добавить в контакты и открыть чат с ним?',
                                           QMessageBox.Yes,
                                           QMessageBox.No) == QMessageBox.Yes:
                     self.add_contact(sender)

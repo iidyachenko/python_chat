@@ -33,6 +33,7 @@ class ClientReceiver(threading.Thread, QObject):
 
     def connection_init(self):
         self.sock.connect((self.ip, int(self.port)))
+        self.sock.settimeout(5)
 
     def presence(self, sock):
         msg_presence = {
@@ -110,7 +111,7 @@ class ClientReceiver(threading.Thread, QObject):
         with socket_lock:
             send_message(sock, msg_join)
 
-    def del_contact_massage(self, sock, to):
+    def del_contact_massage(self,to):
         msg_join = {
             "action": "del_contact",
             "time": int(time.time()),
@@ -118,7 +119,7 @@ class ClientReceiver(threading.Thread, QObject):
             "from": self.username,
             "encoding": "utf-8"
         }
-        return send_message(sock, msg_join)
+        send_message(self.sock, msg_join)
 
     def parse_answer(self, req_dict):
         """Парсим полученный ответ"""
