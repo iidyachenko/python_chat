@@ -43,6 +43,18 @@ def send_contact_list(client, contact_list):
     send_message(client, msg_response)
 
 
+def send_users_list(client, contact_list):
+    """Возвращаем список контактов"""
+    msg_response = {
+        "action": 'users',
+        "time": int(time.time()),
+        "response": '202',
+        "alert": contact_list,
+    }
+    send_message(client, msg_response)
+
+
+
 class Server(threading.Thread, metaclass=ServerVerifier):
     server_port = Port()
 
@@ -86,7 +98,7 @@ class Server(threading.Thread, metaclass=ServerVerifier):
             except:
                 print(f' r Клиент {all_clients_dict[sock]} {sock.getpeername()} отключился')
                 self.db.user_logout(all_clients_dict[sock])
-                client_quit_req = {sock: {'action': 'quit', 'username': all_clients_dict[sock]}}
+                client_quit_req = {sock: {'action': 'quit', 'username': all_clients_dict[sock],"time": int(time.time())}}
                 # оправляем всем сообщение что пользователь отключился
                 self.write_responses(client_quit_req, w_clients, all_clients_dict)
                 if all_clients_dict.get(sock):
@@ -99,11 +111,22 @@ class Server(threading.Thread, metaclass=ServerVerifier):
         for sock in w_clients:
             for _, request in requests.items():
                 try:
-                    # print(request)
+                    print(request,sock)
                     # Подготовить и отправить всем слушающм клиентам ответ в чат или личным сообщением
-                    if request['action'] == 'get_contacts' and request['user_login'] == all_clients_dict[sock]:
-                        # print(self.db.contact_list(request['user_login']))
-                        send_contact_list(sock, self.db.contact_list(request['user_login']))
+                    if request['action'] == 'get_contacts':
+                        if request['user_login'] == all_clients_dict[sock]:
+                            # print(self.db.contact_list(request['user_login']))
+                            send_contact_list(sock, self.db.contact_list(request['user_login']))
+                        else:
+                            continue
+                    elif request['action'] == 'get_users':
+                        if request['user_login'] == all_clients_dict[sock]:
+                            send_users_list(sock, [x[0] for x in self.db.users_list()])
+                        else:
+                            continue
+                    elif request['action'] == 'quit':
+                        send_message(sock, request)
+                        continue
                     elif request['action'] == 'presence' or request['to'] == all_clients_dict[sock] or request[
                         'to'] == '#':
                         if request['action'] == 'msg' and request['to'] != '#':

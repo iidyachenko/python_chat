@@ -218,4 +218,5 @@ if __name__ == '__main__':
     # db.user_send_message('Rick', 'Roland')
     # db.add_contact('Rick', 'Nick')
     # db.remove_contact('Rick', 'Roland')
-    # print(db.contact_list('Rick'))
+    print(db.contact_list('Rick'))
+
