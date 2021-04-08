@@ -9,6 +9,9 @@ from datetime import datetime
 import log.Client.client_log_config
 
 from socket import socket, AF_INET, SOCK_STREAM
+
+from client_storage import ClientDB
+from common.metaclasses import ClientVerifier
 from common.utils import send_message, get_data_from_message, load_setting, Log, log
 
 
@@ -23,9 +26,9 @@ class InputThread(threading.Thread):
         self.func(self.sock)
 
 
-class Client():
+class Client(metaclass=ClientVerifier):
 
-    __slots__ = ('logger', 'server_addr', 'server_port', 'client_type', 'username', 'lock', 'work_flag')
+    __slots__ = ('logger', 'server_addr', 'server_port', 'client_type', 'username', 'lock', 'work_flag', 'db')
 
     def __init__(self):
         self.work_flag = True
@@ -51,6 +54,7 @@ class Client():
             self.server_port = args.port
         self.client_type = args.client_type[0]
         self.username = args.username[0]
+        self.db = ClientDB(self.username)
 
     def presence(self, sock):
         msg_presence = {
@@ -70,11 +74,25 @@ class Client():
             sys.exit(1)
         return get_data_from_message(response)
 
-    def join_massage(self, sock):
+    # def join_massage(self, sock):
+    #     msg_join = {
+    #         "action": "join",
+    #         "time": int(time.time()),
+    #         "room": "main_chat"
+    #     }
+    #     send_message(sock, msg_join)
+    #     try:
+    #         response = sock.recv(1000000)
+    #     except Exception:
+    #         self.logger.exception('Ошибка при приеме ответа с сервера')
+    #         sys.exit(1)
+    #     return get_data_from_message(response)
+
+    def get_contacts(self, sock):
         msg_join = {
-            "action": "join",
+            "action": "get_contacts",
             "time": int(time.time()),
-            "room": "main_chat"
+            "user_login": self.username
         }
         send_message(sock, msg_join)
         try:
@@ -96,31 +114,63 @@ class Client():
         }
         return send_message(sock, msg_join)
 
+    def add_contact_massage(self, sock, to):
+        msg_join = {
+            "action": "add_contact",
+            "time": int(time.time()),
+            "to": to,
+            "from": self.username,
+            "encoding": "utf-8"
+        }
+        return send_message(sock, msg_join)
+
+    def del_contact_massage(self, sock, to):
+        msg_join = {
+            "action": "del_contact",
+            "time": int(time.time()),
+            "to": to,
+            "from": self.username,
+            "encoding": "utf-8"
+        }
+        return send_message(sock, msg_join)
+
     def send_message_loop(self, sock):
         while True:
             self.lock.acquire()
-            to = input('Введите адресат сообщения(что бы отправить сообщение всем нажмите #): ')
-            if to == 'exit':
+            choice = input('Выберите действие: \n'
+                           'mes - создать сообщение \n'
+                           'contact - просмотреть контакты \n'
+                           'add - создать контакт \n'
+                           'remove - удалить контакт \n'
+                           'exit - выход \n')
+            if choice == 'mes':
+                to = input('Введите адресат сообщения(что бы отправить сообщение всем нажмите #): ')
+                msg = input(f'Ваше сообщение пользователю {to}: ')
+                self.user_massage(sock, to, msg)
+            elif choice == 'contact':
+                print(self.db.get_contacts())
+            elif choice == 'add':
+                to = input('Введите имя пользователя для добавления в контакты: ')
+                self.add_contact_massage(sock, to)
+            elif choice == 'remove':
+                to = input('Введите имя пользователя для удаления из контактов: ')
+                self.del_contact_massage(sock, to)
+            elif choice == 'exit':
                 self.lock.release()
-                self.work_flag = False
-                print("Осуществляется выход из чата")
                 break
-            msg = input(f'Ваше сообщение пользователю {to}: ')
-            if msg == 'exit':
-                self.lock.release()
-                self.work_flag = False
-                print("Осуществляется выход из чата")
-                break
-            self.user_massage(sock, to, msg)
+            else:
+                print("Вы ввели неверный код")
             self.lock.release()
             print('Новые сообщения:')
-            time.sleep(1)
+            time.sleep(2)
 
     def recv_message(self, sock):
         response_list = queue.Queue()
         while self.work_flag:
             if self.lock.locked():
+                # sock.settimeout(3)
                 response = sock.recv(1000000)
+                print('Timeout')
                 response_list.put(response)
             else:
                 if not response_list.empty():
@@ -145,21 +195,31 @@ class Client():
             print(f"{msg_time} {req_dict['from']}: {req_dict['message']}")
         elif req_dict.get('action') == 'quit':
             print(f"{msg_time} Пользователь {req_dict['username']} покинул чат")
+        # elif req_dict.get('action') == 'contacts':
+        #     print(req_dict['alert'])
 
     def run(self):
 
         with socket(AF_INET, SOCK_STREAM) as sock:  # Создать сокет TCP
-            sock.connect((self.server_addr, self.server_port))  # Соединиться с сервером
+            sock.connect((self.server_addr, int(self.server_port)))  # Соединиться с сервером
             self.presence(sock)
+            print(self.get_contacts(sock))
+            contacts = self.get_contacts(sock)['alert']
+            for contact in contacts:
+                self.db.add_contact(contact)
             if self.client_type == 'input':
                 self.send_message_loop(sock)
             elif self.client_type == 'multi':
                 recv_t = InputThread(self.recv_message, sock)
                 interface_t = InputThread(self.send_message_loop, sock)
-                interface_t.start()
                 recv_t.start()
-                interface_t.join()
-
+                interface_t.start()
+                # interface_t.join()
+                while True:
+                    time.sleep(2)
+                    if interface_t.is_alive() and recv_t.is_alive():
+                        continue
+                    break
             else:
                 self.recv_message(sock)
 

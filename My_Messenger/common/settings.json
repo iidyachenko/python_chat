@@ -1,7 +1,8 @@
 {
-  "DEFAULT_IP_ADDRESS": "127.0.0.1",
-  "DEFAULT_PORT": 7777,
-  "MAX_CONNECTION": 5,
-  "MAX_PACKAGE_LENGTH": 100000,
-  "USER": "Igor"
+    "DEFAULT_IP_ADDRESS": "127.0.0.1",
+    "DEFAULT_PORT": "7777",
+    "MAX_CONNECTION": 5,
+    "MAX_PACKAGE_LENGTH": 100000,
+    "USER": "Igor",
+    "DATABASE": "sqlite:///storage_base.db3"
 }
