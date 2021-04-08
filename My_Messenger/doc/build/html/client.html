@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>MyMessenger модуль клиента &#8212; документация MyMessenger 0.0.1</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Алфавитный указатель" href="genindex.html" />
+    <link rel="search" title="Поиск" href="search.html" />
+    <link rel="prev" title="Welcome to MyMessenger’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="mymessenger">
+<h1>MyMessenger модуль клиента<a class="headerlink" href="#mymessenger" title="Ссылка на этот заголовок">¶</a></h1>
+<p>Клиентское приложение для обмена сообщениями. Поддерживает
+отправку сообщений пользователям которые находятся в сети, сообщения шифруются
+с помощью алгоритма RSA с длинной ключа 2048 bit.</p>
+<p>Поддерживает аргументы коммандной строки:</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">client.py</span> <span class="pre">{имя</span> <span class="pre">сервера}</span> <span class="pre">{порт}</span> <span class="pre">-u</span> <span class="pre">или</span> <span class="pre">--username</span> <span class="pre">{имя</span> <span class="pre">пользователя}</span> <span class="pre">-p</span> <span class="pre">или</span> <span class="pre">--password</span> <span class="pre">{пароль}</span></code></p>
+<ol class="arabic simple">
+<li><p>{имя сервера} - адрес сервера сообщений.</p></li>
+<li><p>{порт} - порт по которому принимаются подключения</p></li>
+<li><p>-u или –username - имя пользователя с которым произойдёт вход в систему.</p></li>
+<li><p>-p или –password - пароль пользователя.</p></li>
+</ol>
+<p>Все опции командной строки являются необязательными, но имя пользователя и пароль необходимо использовать в паре.</p>
+<p>Примеры использования:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">client.py</span></code></p></li>
+</ul>
+<p><em>Запуск приложения с параметрами по умолчанию.</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">client.py</span> <span class="pre">ip_address</span> <span class="pre">some_port</span></code></p></li>
+</ul>
+<p><em>Запуск приложения с указанием подключаться к серверу по адресу ip_address:port</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-u</span> <span class="pre">test1</span> <span class="pre">-p</span> <span class="pre">123</span></code></p></li>
+</ul>
+<p><em>Запуск приложения с пользователем test1 и паролем 123</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">client.py</span> <span class="pre">ip_address</span> <span class="pre">some_port</span> <span class="pre">-u</span> <span class="pre">test1</span> <span class="pre">-p</span> <span class="pre">123</span></code></p></li>
+</ul>
+<p><em>Запуск приложения с пользователем test1 и паролем 123 и указанием подключаться к серверу по адресу ip_address:port</em></p>
+<section id="client-py">
+<h2>client.py<a class="headerlink" href="#client-py" title="Ссылка на этот заголовок">¶</a></h2>
+<p>Запускаемый модуль,содержит парсер аргументов командной строки и функционал инициализации приложения.</p>
+<dl>
+<dt>client. <strong>arg_parser</strong> ()</dt><dd><p>Парсер аргументов командной строки, возвращает кортеж из 4 элементов:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>адрес сервера</p></li>
+<li><p>порт</p></li>
+<li><p>имя пользователя</p></li>
+<li><p>пароль</p></li>
+</ul>
+</div></blockquote>
+<p>Выполняет проверку на корректность номера порта.</p>
+</dd>
+</dl>
+</section>
+<section id="database-py">
+<h2>database.py<a class="headerlink" href="#database-py" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="py class">
+<dt id="client.client_storage.ClientDB">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">client.client_storage.</span></code><code class="sig-name descname"><span class="pre">ClientDB</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Класс - оболочка для работы с базой данных клиента.
+Использует SQLite базу данных, реализован с помощью
+SQLAlchemy ORM и используется классический подход.</p>
+<dl class="py class">
+<dt id="client.client_storage.ClientDB.Base">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Base</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.Base" title="Ссылка на это определение">¶</a></dt>
+<dd><p>The base class of the class hierarchy.</p>
+<p>When called, it accepts no arguments and returns a new featureless
+instance that has no instance attributes and cannot be given any.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="client.client_storage.ClientDB.Contacts">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Contacts</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.Contacts" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Таблица контактов</p>
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.Contacts.id">
+<code class="sig-name descname"><span class="pre">id</span></code><a class="headerlink" href="#client.client_storage.ClientDB.Contacts.id" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.Contacts.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#client.client_storage.ClientDB.Contacts.name" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="client.client_storage.ClientDB.MessageHistory">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MessageHistory</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">income</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Таблица с историей сообщений</p>
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.MessageHistory.date">
+<code class="sig-name descname"><span class="pre">date</span></code><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory.date" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.MessageHistory.id">
+<code class="sig-name descname"><span class="pre">id</span></code><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory.id" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.MessageHistory.income">
+<code class="sig-name descname"><span class="pre">income</span></code><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory.income" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.MessageHistory.text">
+<code class="sig-name descname"><span class="pre">text</span></code><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory.text" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.MessageHistory.user">
+<code class="sig-name descname"><span class="pre">user</span></code><a class="headerlink" href="#client.client_storage.ClientDB.MessageHistory.user" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="client.client_storage.ClientDB.Users">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Users</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.Users" title="Ссылка на это определение">¶</a></dt>
+<dd><p>таблица всех пользователей</p>
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.Users.id">
+<code class="sig-name descname"><span class="pre">id</span></code><a class="headerlink" href="#client.client_storage.ClientDB.Users.id" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="client.client_storage.ClientDB.Users.login">
+<code class="sig-name descname"><span class="pre">login</span></code><a class="headerlink" href="#client.client_storage.ClientDB.Users.login" title="Ссылка на это определение">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.add_contact">
+<code class="sig-name descname"><span class="pre">add_contact</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.add_contact" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция добавления контактов
+:param contact:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.add_users_from_server">
+<code class="sig-name descname"><span class="pre">add_users_from_server</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">users_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.add_users_from_server" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Добавление списка пользователей с сервера
+:param users_list:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.check_contact">
+<code class="sig-name descname"><span class="pre">check_contact</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.check_contact" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция проверяющая наличие контакта в списке
+:param contact:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.del_contact">
+<code class="sig-name descname"><span class="pre">del_contact</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.del_contact" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция удаления контакта
+:param contact:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.get_contacts">
+<code class="sig-name descname"><span class="pre">get_contacts</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.get_contacts" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция возвращает список контактов
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.get_history">
+<code class="sig-name descname"><span class="pre">get_history</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.get_history" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция возвращающая историю переписки
+:param name:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.get_users">
+<code class="sig-name descname"><span class="pre">get_users</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.get_users" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция возвращает список известных пользователей
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.client_storage.ClientDB.save_message">
+<code class="sig-name descname"><span class="pre">save_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">income</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.client_storage.ClientDB.save_message" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Сохраняем входящее и исходящие сообщения
+:param user:
+:param income:
+:param message:
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="add-contact-gui-py">
+<h2>add_contact_gui.py<a class="headerlink" href="#add-contact-gui-py" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="py class">
+<dt id="client.add_contact_gui.AddContactDialog">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">client.add_contact_gui.</span></code><code class="sig-name descname"><span class="pre">AddContactDialog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transport</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.add_contact_gui.AddContactDialog" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Диалог выбора контакта для добавления реализован на QT</p>
+<dl class="py method">
+<dt id="client.add_contact_gui.AddContactDialog.possible_contacts_update">
+<code class="sig-name descname"><span class="pre">possible_contacts_update</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.add_contact_gui.AddContactDialog.possible_contacts_update" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Заполняем список возможных контактов разницей между всеми пользователями и теми что уже есть в контактах</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.add_contact_gui.AddContactDialog.update_possible_contacts">
+<code class="sig-name descname"><span class="pre">update_possible_contacts</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.add_contact_gui.AddContactDialog.update_possible_contacts" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Обновление возможных контактов. Обновляет таблицу известных пользователей,
+затем содержимое предполагаемых контактов</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="del-contact-gui-py">
+<h2>del_contact_gui.py<a class="headerlink" href="#del-contact-gui-py" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="py class">
+<dt id="client.del_contact_gui.DelContactDialog">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">client.del_contact_gui.</span></code><code class="sig-name descname"><span class="pre">DelContactDialog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.del_contact_gui.DelContactDialog" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Диалог выбора контакта для удаления</p>
+</dd></dl>
+
+</section>
+<section id="main-window-gui-py">
+<h2>main_window_gui.py<a class="headerlink" href="#main-window-gui-py" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="py class">
+<dt id="client.main_window_gui.ClientMainWindow">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">client.main_window_gui.</span></code><code class="sig-name descname"><span class="pre">ClientMainWindow</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Основной интерфейс пользовтеля, сделан на Qt</p>
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.add_contact">
+<code class="sig-name descname"><span class="pre">add_contact</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_contact</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.add_contact" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция добавляющяя контакт в базы
+:param new_contact:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.add_contact_action">
+<code class="sig-name descname"><span class="pre">add_contact_action</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.add_contact_action" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция - обработчик добавления, сообщает серверу, обновляет таблицу и список контактов
+:param item:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.add_contact_window">
+<code class="sig-name descname"><span class="pre">add_contact_window</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.add_contact_window" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция добавления контакта</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.clients_list_update">
+<code class="sig-name descname"><span class="pre">clients_list_update</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.clients_list_update" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Обновляем список контактов</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.connection_lost">
+<code class="sig-name descname"><span class="pre">connection_lost</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.connection_lost" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Слот обработчик потери соеднинения с сервером.
+Выдаёт окно предупреждение и завершает работу приложения.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.delete_contact">
+<code class="sig-name descname"><span class="pre">delete_contact</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.delete_contact" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция обработчик удаления контакта, сообщает на сервер, обновляет таблицу контактов
+:param item:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.delete_contact_window">
+<code class="sig-name descname"><span class="pre">delete_contact_window</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.delete_contact_window" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Окно удаления контактов</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.history_list_update">
+<code class="sig-name descname"><span class="pre">history_list_update</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.history_list_update" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Обновляем историю переписки пользователя и выводим на экран
+Берём не более 20 последних записей.
+Заполнение модели записями, так-же стоит разделить входящие и исходящие выравниванием и разным фоном.
+Записи в обратном порядке, поэтому выбираем их с конца и не более 20</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.make_connection">
+<code class="sig-name descname"><span class="pre">make_connection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trans_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.make_connection" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Связываем события и функции из обработчика
+:param trans_obj:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.message">
+<code class="sig-name descname"><span class="pre">message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.message" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Слот обработчик поступаемых сообщений, выполняет дешифровку
+поступаемых сообщений и их сохранение в истории сообщений.
+Запрашивает пользователя если пришло сообщение не от текущего
+собеседника. При необходимости меняет собеседника.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.select_active_user">
+<code class="sig-name descname"><span class="pre">select_active_user</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.select_active_user" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запрашиваем публичный ключ пользователя и создаём объект шифрования
+Если ключа нет то ошибка, что не удалось начать чат с пользователем
+Ставим надпись и активируем кнопки
+Заполняем окно историю сообщений по требуемому пользователю.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.send_message">
+<code class="sig-name descname"><span class="pre">send_message</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.send_message" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Функция отправки сообщения пользователяю
+Шифруем сообщение ключом получателя и упаковываем в base64.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.set_active_user">
+<code class="sig-name descname"><span class="pre">set_active_user</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.set_active_user" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Выбираем активного пользователя</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.main_window_gui.ClientMainWindow.set_disabled_input">
+<code class="sig-name descname"><span class="pre">set_disabled_input</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.main_window_gui.ClientMainWindow.set_disabled_input" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Устанавливаем блокировку на поля ввода при запуске</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="receiver-py">
+<h2>receiver.py<a class="headerlink" href="#receiver-py" title="Ссылка на этот заголовок">¶</a></h2>
+<dl class="py class">
+<dt id="client.receiver.ClientReceiver">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">client.receiver.</span></code><code class="sig-name descname"><span class="pre">ClientReceiver</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Основной класс для взаимодействия клиента и сервера.</p>
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.add_contact_massage">
+<code class="sig-name descname"><span class="pre">add_contact_massage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.add_contact_massage" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запрос на добавление контакта</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.connection_init">
+<code class="sig-name descname"><span class="pre">connection_init</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.connection_init" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запускаем процедуру авторизации
+Получаем хэш пароля</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.del_contact_massage">
+<code class="sig-name descname"><span class="pre">del_contact_massage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.del_contact_massage" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запрос на удаление контакта</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.get_contacts">
+<code class="sig-name descname"><span class="pre">get_contacts</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.get_contacts" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запрос списка контактов с сервера</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.get_users">
+<code class="sig-name descname"><span class="pre">get_users</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.get_users" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запрос списка пользователей с сервера</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.key_request">
+<code class="sig-name descname"><span class="pre">key_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.key_request" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Метод запрашивающий с сервера публичный ключ пользователя.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.parse_answer">
+<code class="sig-name descname"><span class="pre">parse_answer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.parse_answer" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Парсим полученный ответ</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.presence">
+<code class="sig-name descname"><span class="pre">presence</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passwd_hash_string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.presence" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Отправка сообщения о подключении к серверу
+:param passwd_hash_string:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.run" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Запуск цикла основного потока.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="client.receiver.ClientReceiver.user_massage">
+<code class="sig-name descname"><span class="pre">user_massage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#client.receiver.ClientReceiver.user_massage" title="Ссылка на это определение">¶</a></dt>
+<dd><p>Отправка пользовательского сообщения на сервер</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MyMessenger</a></h1>
+
+
+
+
+
+
+
+
+<h3>Навигация</h3>
+<p><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MyMessenger модуль клиента</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#client-py">client.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database-py">database.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-contact-gui-py">add_contact_gui.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#del-contact-gui-py">del_contact_gui.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-window-gui-py">main_window_gui.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#receiver-py">receiver.py</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="предыдущая глава">Welcome to MyMessenger’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Быстрый поиск</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Igor.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/client.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
