@@ -1,10 +1,8 @@
-import time
 import unittest
 from socket import socket, AF_INET, SOCK_STREAM
 from unittest.mock import Mock
 
 import client
-from common import utils
 
 
 class ClientTests(unittest.TestCase):
