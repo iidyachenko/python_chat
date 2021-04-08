@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import logging
@@ -9,6 +9,10 @@ logger = logging.getLogger('server')
 
 
 class ServerDB:
+    """
+    Класс - для работы с базой данных сервера.
+    Использует SQLite базу данных, реализован с помощью SQLAlchemy ORM и используется декларативный подход.
+    """
     Base = declarative_base()
 
     # таблица всех пользователей
@@ -17,10 +21,14 @@ class ServerDB:
         id = Column(Integer, primary_key=True)
         login = Column(String, unique=True)
         last_conn = Column(DateTime)
+        passwd_hash = Column(String)
+        pubkey = Column(Text)
 
-        def __init__(self, login):
+        def __init__(self, login, passwd_hash):
             self.login = login
             self.last_conn = datetime.datetime.now()
+            self.passwd_hash = passwd_hash
+            self.pubkey = None
 
     # таблица с историей всех входов пользователя в систему
     class LoginHistory(Base):
@@ -78,16 +86,17 @@ class ServerDB:
             self.accepted = accepted
 
     def __init__(self, database):
-        self.engine = create_engine(database, echo=False)
+        self.engine = create_engine(database, echo=False, pool_recycle=7200, connect_args={'check_same_thread': False})
         self.Base.metadata.create_all(self.engine)
         session = sessionmaker(bind=self.engine)
         self.session = session()
         self.session.query(self.ActiveUsers).delete()
         self.session.commit()
 
-    def user_login(self, username, ip, port):
+    def user_login(self, username, ip, port, pubkey):
         """
         Добавлям пользователя в таблицы: all_user(при необходимости),active_users, login_history
+        :param pubkey:
         :param username:
         :param ip:
         :param port:
@@ -97,10 +106,10 @@ class ServerDB:
         if query.count():
             user = query.first()
             user.last_conn = datetime.datetime.now()
+            if user.pubkey != pubkey:
+                user.pubkey = pubkey
         else:
-            user = self.Users(username)
-            self.session.add(user)
-            self.session.commit()
+            raise ValueError('Пользователь не зарегистрирован.')
         try:
             history = self.LoginHistory(user.id, ip, port, datetime.datetime.now())
             self.session.add(history)
@@ -109,6 +118,27 @@ class ServerDB:
             self.session.commit()
         except:
             logger.exception("Ошибка при вставке в Базу данных")
+
+    def add_user(self, name, passwd_hash):
+        """
+        Метод регистрации пользователя.
+        Принимает имя и хэш пароля, создаёт запись в таблице статистики.
+        """
+        user_row = self.Users(name, passwd_hash)
+        self.session.add(user_row)
+        self.session.commit()
+
+    def remove_user(self, name):
+        """Метод удаляющий пользователя из базы."""
+
+        user = self.session.query(self.Users).filter_by(name=name).first()
+        self.session.query(self.ActiveUsers).filter_by(user=user.id).delete()
+        self.session.query(self.LoginHistory).filter_by(user=user.id).delete()
+        self.session.query(self.LoginContact).filter_by(user=user.id).delete()
+        self.session.query(self.LoginContact).filter_by(user_contact=user.id).delete()
+        self.session.query(self.LoginHistory).filter_by(user=user.id).delete()
+        self.session.query(self.Users).filter_by(login=name).delete()
+        self.session.commit()
 
     def user_logout(self, username):
         """
@@ -207,10 +237,36 @@ class ServerDB:
         # Возвращаем список кортежей
         return query.all()
 
+    def get_hash(self, name):
+        """Метод получения хэша пароля пользователя."""
+        user = self.session.query(self.Users).filter_by(login=name).first()
+        return user.passwd_hash
+
+    def get_pubkey(self, name):
+        """Метод получения публичного ключа пользователя."""
+        user = self.session.query(self.Users).filter_by(login=name).first()
+        return user.pubkey
+
+    def check_user(self, name):
+        """Метод проверяющий существование пользователя."""
+        if self.session.query(self.Users).filter_by(login=name).count():
+            return True
+        else:
+            return False
+
+    def get_username(self):
+        """Имена пользователей"""
+        query = self.session.query(self.Users.login).all()
+        return [x[0] for x in query]
+
+    def get_active_username(self):
+        """Имена активных пользователей"""
+        return [x[0] for x in self.active_users_list()]
+
 
 if __name__ == '__main__':
-    db = ServerDB('sqlite:///storage_base.db3')
-    db.user_login('Rick', '1/1/1//1', '222222')
+    db = ServerDB('sqlite:///server_base.db3')
+    # db.user_login('Rick', '1/1/1//1', '222222')
     # print(db.users_list())
     # print(db.active_users_list())
     # print(db.login_history())
@@ -218,5 +274,7 @@ if __name__ == '__main__':
     # db.user_send_message('Rick', 'Roland')
     # db.add_contact('Rick', 'Nick')
     # db.remove_contact('Rick', 'Roland')
-    print(db.contact_list('Rick'))
+    # print(db.contact_list('Rick'))
+    print(db.get_pubkey('Rick'))
+    print(db.get_pubkey('Nick'))
 

@@ -5,6 +5,9 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 import os
 
+from server.add_user import RegisterUser
+from server.remove_user import DelUserDialog
+
 
 def gui_create_model(database):
     list_users = database.active_users_list()
@@ -50,9 +53,23 @@ def create_stat_model(database):
 
 # Класс основного окна
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, database, server):
         super().__init__()
         self.initUI()
+        self.database = database
+        self.server = server
+
+    def reg_user(self):
+        """Метод создающий окно регистрации пользователя."""
+        global reg_window
+        reg_window = RegisterUser(self.database)
+        reg_window.show()
+
+    def rem_user(self):
+        """Метод создающий окно удаления пользователя."""
+        global rem_window
+        rem_window = DelUserDialog(self.database, self.server_thread)
+        rem_window.show()
 
     def initUI(self):
         # Кнопка выхода
@@ -69,6 +86,11 @@ class MainWindow(QMainWindow):
         # Кнопка вывести историю сообщений
         self.show_history_button = QAction('История клиентов', self)
 
+        # Кнопка регистрации пользователя
+        self.register_btn = QAction('Регистрация пользователя', self)
+        # Кнопка удаления пользователя
+        self.remove_btn = QAction('Удаление пользователя', self)
+
         # Статусбар
         # dock widget
         self.statusBar()
@@ -78,6 +100,8 @@ class MainWindow(QMainWindow):
         self.toolbar.addAction(self.refresh_button)
         self.toolbar.addAction(self.show_history_button)
         self.toolbar.addAction(self.config_btn)
+        self.toolbar.addAction(self.register_btn)
+        self.toolbar.addAction(self.remove_btn)
         self.toolbar.addAction(exitAction)
 
         # Настройки геометрии основного окна
@@ -93,6 +117,9 @@ class MainWindow(QMainWindow):
         self.active_clients_table = QTableView(self)
         self.active_clients_table.move(10, 45)
         self.active_clients_table.setFixedSize(780, 400)
+
+        self.register_btn.triggered.connect(self.reg_user)
+        self.remove_btn.triggered.connect(self.rem_user)
 
         # Последним параметром отображаем окно.
         self.show()
